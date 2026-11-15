@@ -1,0 +1,1630 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1a3a8f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Bristol FC">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+<meta name="description" content="Gestión de socios, cuotas y carnets del Club Bristol F.C.">
+<title>Bristol F.C. · Gestión de Socios</title>
+<link rel="manifest" href="./manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<style>
+/* ═══════════════════════════════════════════
+   DESIGN TOKENS — Bristol FC
+═══════════════════════════════════════════ */
+:root {
+  --blue-900: #0d1b4b;
+  --blue-800: #132260;
+  --blue-700: #1a3a8f;
+  --blue-600: #1f4fd8;
+  --blue-500: #3b6ef5;
+  --blue-400: #6f93ff;
+  --blue-100: #dce8ff;
+  --blue-50:  #f0f4ff;
+  --white: #ffffff;
+  --gray-50: #f8faff;
+  --gray-100: #edf0f7;
+  --gray-200: #dde2ee;
+  --gray-300: #c0c9db;
+  --gray-500: #8492ab;
+  --gray-700: #4a5568;
+  --gray-900: #1a2033;
+  --green: #17a85a;
+  --green-bg: #e6f7ef;
+  --red: #c0392b;
+  --red-bg: #fdeaea;
+  --amber: #d97706;
+  --amber-bg: #fef3c7;
+
+  --bg: var(--gray-50);
+  --surface: var(--white);
+  --surface2: var(--gray-100);
+  --border: var(--gray-200);
+  --text: var(--gray-900);
+  --text-muted: var(--gray-500);
+  --primary: var(--blue-700);
+  --primary-dark: var(--blue-900);
+  --primary-light: var(--blue-50);
+  --accent: var(--blue-500);
+
+  --radius-sm: 8px;
+  --radius: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --shadow: 0 2px 12px rgba(26,58,143,.10);
+  --shadow-lg: 0 8px 32px rgba(26,58,143,.18);
+
+  --nav-h: 64px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bot: env(safe-area-inset-bottom, 0px);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0a0f1e;
+    --surface: #111827;
+    --surface2: #1a2235;
+    --border: #2a3550;
+    --text: #e8edf8;
+    --text-muted: #7a8aaa;
+    --primary-light: #1a2a60;
+  }
+}
+
+/* ═══════════════════════════════════════════
+   RESET & BASE
+═══════════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px;-webkit-text-size-adjust:100%}
+body{
+  font-family:'Inter',system-ui,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  min-height:100dvh;
+  overflow-x:hidden;
+  line-height:1.5;
+}
+button{font:inherit;cursor:pointer;border:none;background:none}
+input,select,textarea{font:inherit}
+a{color:inherit;text-decoration:none}
+img{max-width:100%;display:block}
+ul,ol{list-style:none}
+
+/* ═══════════════════════════════════════════
+   LAYOUT SHELL
+═══════════════════════════════════════════ */
+#app{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
+.view{flex:1;display:none;flex-direction:column}
+.view.active{display:flex}
+
+/* ═══════════════════════════════════════════
+   TOP APP BAR
+═══════════════════════════════════════════ */
+.appbar{
+  position:sticky;top:0;z-index:100;
+  background:var(--primary);
+  color:#fff;
+  padding:calc(var(--safe-top) + 12px) 16px 12px;
+  display:flex;align-items:center;gap:12px;
+  box-shadow:0 2px 16px rgba(0,0,0,.25);
+}
+.appbar-logo{width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,.4)}
+.appbar-title{flex:1}
+.appbar-title h1{font-size:17px;font-weight:700;line-height:1.2}
+.appbar-title span{font-size:12px;opacity:.8}
+.appbar-actions{display:flex;gap:8px}
+.icon-btn{
+  width:36px;height:36px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(255,255,255,.15);
+  color:#fff;font-size:18px;
+  transition:background .2s;
+}
+.icon-btn:hover{background:rgba(255,255,255,.25)}
+
+/* ═══════════════════════════════════════════
+   BOTTOM NAV
+═══════════════════════════════════════════ */
+.bottom-nav{
+  position:sticky;bottom:0;z-index:100;
+  background:var(--surface);
+  border-top:1px solid var(--border);
+  display:flex;
+  padding-bottom:var(--safe-bot);
+  box-shadow:0 -4px 20px rgba(0,0,0,.08);
+}
+.nav-item{
+  flex:1;display:flex;flex-direction:column;align-items:center;
+  gap:3px;padding:10px 4px;
+  color:var(--text-muted);font-size:10px;font-weight:500;
+  transition:color .2s;cursor:pointer;
+}
+.nav-item.active{color:var(--primary)}
+.nav-item .nav-icon{
+  font-size:22px;line-height:1;
+  transition:transform .2s;
+}
+.nav-item.active .nav-icon{transform:scale(1.15)}
+
+/* ═══════════════════════════════════════════
+   SCROLL CONTENT
+═══════════════════════════════════════════ */
+.scroll-content{flex:1;overflow-y:auto;padding:12px 16px 16px}
+@media(min-width:600px){.scroll-content{max-width:600px;margin:0 auto;width:100%;padding:20px 24px 24px}}
+
+/* ═══════════════════════════════════════════
+   CARDS
+═══════════════════════════════════════════ */
+.card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:16px;
+  margin-bottom:12px;
+  box-shadow:var(--shadow);
+}
+.card-title{font-size:15px;font-weight:700;margin-bottom:12px;color:var(--text)}
+.card-subtitle{font-size:13px;color:var(--text-muted);margin-top:2px}
+
+/* ═══════════════════════════════════════════
+   HERO CARD (gradient)
+═══════════════════════════════════════════ */
+.hero-card{
+  background:linear-gradient(135deg,var(--blue-900) 0%,var(--blue-700) 60%,#14a085 100%);
+  color:#fff;
+  border:none;
+  border-radius:var(--radius-xl);
+  padding:20px;
+  position:relative;
+  overflow:hidden;
+}
+.hero-card::before{
+  content:'';position:absolute;top:-40px;right:-40px;
+  width:160px;height:160px;border-radius:50%;
+  background:rgba(255,255,255,.07);
+}
+.hero-card::after{
+  content:'';position:absolute;bottom:-30px;left:-20px;
+  width:120px;height:120px;border-radius:50%;
+  background:rgba(255,255,255,.05);
+}
+
+/* ═══════════════════════════════════════════
+   STAT GRID
+═══════════════════════════════════════════ */
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.stat-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:14px;
+  box-shadow:var(--shadow);
+}
+.stat-value{font-size:24px;font-weight:800;line-height:1}
+.stat-label{font-size:12px;color:var(--text-muted);margin-top:4px}
+
+/* ═══════════════════════════════════════════
+   LIST ROWS
+═══════════════════════════════════════════ */
+.list-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:12px 0;
+  border-bottom:1px solid var(--border);
+  gap:8px;
+}
+.list-row:last-child{border-bottom:none;padding-bottom:0}
+.list-row:first-child{padding-top:0}
+.row-left{display:flex;flex-direction:column;gap:2px}
+.row-title{font-size:14px;font-weight:600}
+.row-sub{font-size:12px;color:var(--text-muted)}
+
+/* ═══════════════════════════════════════════
+   BADGES & CHIPS
+═══════════════════════════════════════════ */
+.badge{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:11px;font-weight:600;padding:3px 10px;
+  border-radius:99px;
+}
+.badge-green{background:var(--green-bg);color:var(--green)}
+.badge-red{background:var(--red-bg);color:var(--red)}
+.badge-amber{background:var(--amber-bg);color:var(--amber)}
+.badge-blue{background:var(--blue-100);color:var(--blue-700)}
+.badge-gray{background:var(--surface2);color:var(--text-muted)}
+
+/* ═══════════════════════════════════════════
+   BUTTONS
+═══════════════════════════════════════════ */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  padding:13px 20px;border-radius:var(--radius);
+  font-size:14px;font-weight:600;
+  transition:all .2s;cursor:pointer;
+  border:none;
+}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:hover{background:var(--blue-800);transform:translateY(-1px);box-shadow:var(--shadow-lg)}
+.btn-primary:active{transform:translateY(0)}
+.btn-outline{background:transparent;color:var(--primary);border:1.5px solid var(--primary)}
+.btn-outline:hover{background:var(--primary-light)}
+.btn-ghost{background:transparent;color:var(--text-muted);padding:8px}
+.btn-danger{background:var(--red-bg);color:var(--red)}
+.btn-full{width:100%}
+.btn-sm{padding:8px 14px;font-size:13px;border-radius:var(--radius-sm)}
+
+/* ═══════════════════════════════════════════
+   FORM ELEMENTS
+═══════════════════════════════════════════ */
+.form-group{margin-bottom:14px}
+.form-label{font-size:13px;font-weight:600;color:var(--text-muted);margin-bottom:6px;display:block}
+.form-input{
+  width:100%;padding:13px 14px;
+  border-radius:var(--radius);
+  border:1.5px solid var(--border);
+  background:var(--surface);
+  color:var(--text);
+  font-size:15px;
+  transition:border-color .2s,box-shadow .2s;
+  outline:none;
+}
+.form-input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(26,58,143,.12)}
+select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238492ab' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:36px}
+
+/* ═══════════════════════════════════════════
+   AVATAR
+═══════════════════════════════════════════ */
+.avatar{
+  width:44px;height:44px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;font-weight:700;color:#fff;
+  flex-shrink:0;
+}
+.avatar-sm{width:32px;height:32px;font-size:12px}
+.avatar-lg{width:72px;height:72px;font-size:26px;border:3px solid rgba(255,255,255,.4)}
+
+/* Avatar colors */
+.av-blue{background:linear-gradient(135deg,#1a3a8f,#3b6ef5)}
+.av-teal{background:linear-gradient(135deg,#0f7c6e,#14a085)}
+.av-purple{background:linear-gradient(135deg,#6b21a8,#9333ea)}
+.av-orange{background:linear-gradient(135deg,#b45309,#f59e0b)}
+.av-pink{background:linear-gradient(135deg,#9d174d,#ec4899)}
+
+/* ═══════════════════════════════════════════
+   QUICK ACTIONS GRID
+═══════════════════════════════════════════ */
+.quick-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:12px}
+.quick-btn{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:16px 12px;
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+  color:var(--text);font-size:13px;font-weight:600;
+  box-shadow:var(--shadow);
+  transition:all .2s;cursor:pointer;
+  position:relative;overflow:hidden;
+}
+.quick-btn::before{content:'';position:absolute;inset:0;background:var(--primary);opacity:0;transition:opacity .2s}
+.quick-btn:hover::before{opacity:.05}
+.quick-btn:active{transform:scale(.97)}
+.quick-btn .qb-icon{font-size:28px;line-height:1}
+.quick-btn.qb-primary{background:var(--primary);color:#fff;border-color:var(--primary)}
+.quick-btn.qb-primary:hover::before{opacity:0}
+.quick-btn.qb-primary:hover{background:var(--blue-800)}
+
+/* ═══════════════════════════════════════════
+   CARNET DIGITAL
+═══════════════════════════════════════════ */
+.carnet{
+  background:linear-gradient(135deg,var(--blue-900) 0%,var(--blue-700) 50%,#14a085 100%);
+  color:#fff;border-radius:var(--radius-xl);
+  padding:20px;position:relative;overflow:hidden;
+  margin-bottom:12px;
+}
+.carnet::before{
+  content:'';position:absolute;top:-30px;right:-30px;
+  width:140px;height:140px;border-radius:50%;
+  background:rgba(255,255,255,.08);pointer-events:none;
+}
+.carnet-club{font-size:11px;font-weight:700;opacity:.8;letter-spacing:2px;text-transform:uppercase}
+.carnet-name{font-size:22px;font-weight:800;margin:6px 0 4px;line-height:1.1}
+.carnet-info{font-size:13px;opacity:.85;margin-bottom:14px}
+.carnet-months{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin:14px 0 0}
+.carnet-month{
+  font-size:10px;font-weight:600;text-align:center;
+  border-radius:6px;padding:5px 2px;
+  background:rgba(255,255,255,.18);
+  transition:all .2s;
+}
+.carnet-month.paid{background:rgba(255,255,255,.95);color:var(--blue-900)}
+.carnet-month.pending{background:rgba(255,0,0,.25);color:#ffd0d0}
+.carnet-divider{height:1px;background:rgba(255,255,255,.2);margin:14px 0}
+.qr-wrap{display:flex;justify-content:center;align-items:center;gap:16px;flex-wrap:wrap}
+#qr-container{background:#fff;border-radius:12px;padding:10px}
+#qr-container canvas,#qr-container img{display:block}
+
+/* ═══════════════════════════════════════════
+   PROGRESS BAR
+═══════════════════════════════════════════ */
+.progress-wrap{background:rgba(255,255,255,.2);border-radius:99px;height:6px;overflow:hidden}
+.progress-bar{height:100%;border-radius:99px;background:rgba(255,255,255,.9);transition:width .6s ease}
+
+/* ═══════════════════════════════════════════
+   ATTENDANCE GRID
+═══════════════════════════════════════════ */
+.attend-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:10px}
+.attend-day{
+  aspect-ratio:1;border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:600;
+}
+.attend-present{background:var(--green-bg);color:var(--green)}
+.attend-absent{background:var(--red-bg);color:var(--red)}
+.attend-empty{background:var(--surface2);color:var(--text-muted)}
+
+/* ═══════════════════════════════════════════
+   TOAST NOTIFICATIONS
+═══════════════════════════════════════════ */
+#toast-container{
+  position:fixed;bottom:calc(var(--nav-h) + var(--safe-bot) + 12px);
+  left:50%;transform:translateX(-50%);
+  z-index:9999;display:flex;flex-direction:column;gap:8px;align-items:center;
+  pointer-events:none;
+}
+.toast{
+  background:var(--gray-900);color:#fff;
+  padding:12px 20px;border-radius:var(--radius);
+  font-size:14px;font-weight:500;
+  box-shadow:0 4px 20px rgba(0,0,0,.35);
+  opacity:0;transform:translateY(10px);
+  transition:all .3s;pointer-events:none;
+  white-space:nowrap;
+}
+.toast.show{opacity:1;transform:translateY(0)}
+.toast.toast-success{background:var(--green)}
+.toast.toast-error{background:var(--red)}
+
+/* ═══════════════════════════════════════════
+   LOGIN SCREEN
+═══════════════════════════════════════════ */
+#view-login{
+  background:linear-gradient(160deg,var(--blue-900) 0%,var(--blue-800) 40%,#0d3330 100%);
+  min-height:100vh;min-height:100dvh;
+  display:none;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:24px;
+  position:relative;overflow:hidden;
+}
+#view-login.active{display:flex}
+#view-login::before{
+  content:'';position:absolute;top:-80px;right:-80px;
+  width:280px;height:280px;border-radius:50%;
+  background:radial-gradient(circle,rgba(63,110,245,.4),transparent 70%);
+}
+#view-login::after{
+  content:'';position:absolute;bottom:-60px;left:-60px;
+  width:220px;height:220px;border-radius:50%;
+  background:radial-gradient(circle,rgba(20,160,133,.3),transparent 70%);
+}
+.login-box{
+  background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.12);
+  backdrop-filter:blur(20px);
+  border-radius:var(--radius-xl);
+  padding:28px 24px;
+  width:100%;max-width:360px;
+  position:relative;z-index:1;
+}
+.login-logo-wrap{text-align:center;margin-bottom:24px}
+.login-logo{
+  width:90px;height:90px;border-radius:50%;
+  margin:0 auto 12px;
+  border:3px solid rgba(255,255,255,.3);
+  box-shadow:0 0 40px rgba(63,110,245,.5);
+  object-fit:cover;
+  overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,var(--blue-700),#14a085);
+  font-size:36px;
+}
+.login-club-name{color:#fff;font-size:20px;font-weight:800;line-height:1.1}
+.login-subtitle{color:rgba(255,255,255,.65);font-size:13px;margin-top:4px}
+.login-form .form-label{color:rgba(255,255,255,.75)}
+.login-form .form-input{
+  background:rgba(255,255,255,.1);
+  border-color:rgba(255,255,255,.2);
+  color:#fff;
+}
+.login-form .form-input::placeholder{color:rgba(255,255,255,.4)}
+.login-form .form-input:focus{border-color:rgba(255,255,255,.5);box-shadow:0 0 0 3px rgba(255,255,255,.1)}
+.login-creds{
+  background:rgba(255,255,255,.08);border-radius:var(--radius-sm);
+  padding:10px 12px;margin-top:12px;
+  font-size:12px;color:rgba(255,255,255,.65);line-height:1.8;
+}
+.login-creds code{color:rgba(255,255,255,.9);font-weight:600}
+
+/* ═══════════════════════════════════════════
+   SECTION HEADERS
+═══════════════════════════════════════════ */
+.section-header{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:10px;
+}
+.section-title{font-size:14px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px}
+.section-action{font-size:13px;font-weight:600;color:var(--primary)}
+
+/* ═══════════════════════════════════════════
+   EMPTY STATES
+═══════════════════════════════════════════ */
+.empty-state{text-align:center;padding:32px 16px;color:var(--text-muted)}
+.empty-state .es-icon{font-size:48px;margin-bottom:12px;opacity:.6}
+.empty-state h3{font-size:16px;font-weight:600;color:var(--text);margin-bottom:6px}
+.empty-state p{font-size:14px}
+
+/* ═══════════════════════════════════════════
+   TABS (horizontal scroll)
+═══════════════════════════════════════════ */
+.tabs{
+  display:flex;gap:8px;overflow-x:auto;padding:4px 0 12px;
+  scrollbar-width:none;
+}
+.tabs::-webkit-scrollbar{display:none}
+.tab{
+  flex-shrink:0;padding:8px 16px;border-radius:99px;
+  font-size:13px;font-weight:600;cursor:pointer;
+  border:1.5px solid var(--border);
+  background:var(--surface);color:var(--text-muted);
+  transition:all .2s;
+}
+.tab.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+
+/* ═══════════════════════════════════════════
+   DIVIDER
+═══════════════════════════════════════════ */
+.divider{height:1px;background:var(--border);margin:16px 0}
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE — Desktop sidebar
+═══════════════════════════════════════════ */
+@media(min-width:768px){
+  .bottom-nav{display:none}
+  .desktop-layout{display:flex;min-height:100vh}
+  .sidebar{
+    width:240px;flex-shrink:0;
+    background:var(--surface);border-right:1px solid var(--border);
+    display:flex;flex-direction:column;
+    padding:16px 0;
+    position:sticky;top:0;height:100vh;overflow-y:auto;
+  }
+  .sidebar-header{
+    padding:12px 20px 20px;
+    display:flex;align-items:center;gap:12px;
+  }
+  .sidebar-logo{width:40px;height:40px;border-radius:50%;object-fit:cover;overflow:hidden;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--blue-700),#14a085);font-size:20px}
+  .sidebar-club{font-size:14px;font-weight:700}
+  .sidebar-nav{flex:1;padding:8px 12px}
+  .sidebar-item{
+    display:flex;align-items:center;gap:12px;
+    padding:11px 12px;border-radius:var(--radius-sm);
+    font-size:14px;font-weight:500;color:var(--text-muted);
+    cursor:pointer;transition:all .2s;margin-bottom:2px;
+  }
+  .sidebar-item:hover{background:var(--surface2);color:var(--text)}
+  .sidebar-item.active{background:var(--primary-light);color:var(--primary);font-weight:600}
+  .sidebar-icon{font-size:20px;width:24px;text-align:center}
+  .sidebar-footer{padding:12px 20px;border-top:1px solid var(--border);margin-top:auto}
+  .main-content{flex:1;overflow-y:auto;display:flex;flex-direction:column}
+  .appbar{position:sticky;top:0}
+}
+@media(max-width:767px){
+  .desktop-layout{display:block}
+  .sidebar{display:none}
+}
+
+/* ═══════════════════════════════════════════
+   ANIMATIONS
+═══════════════════════════════════════════ */
+@keyframes fadeInUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.anim-in{animation:fadeInUp .35s ease both}
+.anim-in-2{animation:fadeInUp .35s .08s ease both}
+.anim-in-3{animation:fadeInUp .35s .16s ease both}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.pulse{animation:pulse 2s infinite}
+
+/* ═══════════════════════════════════════════
+   INSTALL PROMPT
+═══════════════════════════════════════════ */
+#install-banner{
+  display:none;
+  background:linear-gradient(135deg,var(--blue-700),#14a085);
+  color:#fff;padding:12px 16px;
+  align-items:center;gap:12px;
+  font-size:14px;font-weight:500;
+}
+#install-banner.show{display:flex}
+#install-banner button{margin-left:auto;background:rgba(255,255,255,.2);color:#fff;border-radius:var(--radius-sm);padding:8px 14px;font-size:13px;font-weight:600}
+
+/* ═══════════════════════════════════════════
+   UTILS
+═══════════════════════════════════════════ */
+.text-green{color:var(--green)}.text-red{color:var(--red)}.text-muted{color:var(--text-muted)}
+.text-sm{font-size:13px}.text-xs{font-size:12px}.text-lg{font-size:18px}.text-xl{font-size:22px}
+.fw-bold{font-weight:700}.fw-800{font-weight:800}
+.mt-4{margin-top:4px}.mt-8{margin-top:8px}.mt-12{margin-top:12px}.mt-16{margin-top:16px}
+.mb-4{margin-bottom:4px}.mb-8{margin-bottom:8px}.mb-12{margin-bottom:12px}
+.flex{display:flex}.items-center{align-items:center}.justify-between{justify-content:space-between}
+.gap-8{gap:8px}.gap-12{gap:12px}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════
+     INSTALL BANNER
+═══════════════════════════════════════ -->
+<div id="install-banner">
+  📲 Instalá la app en tu dispositivo
+  <button id="install-btn">Instalar</button>
+  <button id="dismiss-banner" style="background:transparent;padding:8px">✕</button>
+</div>
+
+<!-- ═══════════════════════════════════════
+     TOAST
+═══════════════════════════════════════ -->
+<div id="toast-container"></div>
+
+<!-- ═══════════════════════════════════════
+     APP SHELL
+═══════════════════════════════════════ -->
+<div id="app">
+
+  <!-- ══ LOGIN ══ -->
+  <div id="view-login" class="view active">
+    <div class="login-box">
+      <div class="login-logo-wrap">
+        <img src="./logo.png" alt="Bristol FC" class="login-logo" id="login-logo-img" onerror="this.outerHTML='<div class=&quot;login-logo&quot;>⚽</div>'">
+        <div class="login-club-name">Bristol F.C.</div>
+        <div class="login-subtitle">Sistema de gestión de socios</div>
+      </div>
+      <div class="login-form">
+        <div class="form-group">
+          <label class="form-label">Usuario</label>
+          <input class="form-input" id="inp-user" type="text" placeholder="ej: soc01" autocomplete="username" autocapitalize="none">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Contraseña</label>
+          <input class="form-input" id="inp-pass" type="password" placeholder="••••••" autocomplete="current-password">
+        </div>
+        <button class="btn btn-primary btn-full" id="btn-login" style="margin-top:8px">
+          Ingresar →
+        </button>
+      </div>
+      <div class="login-creds">
+        <div>👤 Socios: <code>soc01</code>, <code>soc02</code>, <code>soc03</code> / <code>1234</code></div>
+        <div>🛠️ Admin: <code>admin01</code> / <code>admin123</code></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SOCIO LAYOUT ══ -->
+  <div id="view-socio" class="view" style="display:none">
+    <div class="desktop-layout" style="flex:1">
+
+      <!-- Sidebar desktop -->
+      <aside class="sidebar" id="socio-sidebar">
+        <div class="sidebar-header">
+          <img src="./logo.png" alt="Bristol FC" class="sidebar-logo" style="width:40px;height:40px;border-radius:50%;object-fit:cover" onerror="this.outerHTML='<div class=&quot;sidebar-logo&quot;>⚽</div>'">
+          <div>
+            <div class="sidebar-club" style="font-weight:800">Bristol F.C.</div>
+            <div class="text-xs text-muted" id="sidebar-user-name">—</div>
+          </div>
+        </div>
+        <nav class="sidebar-nav">
+          <div class="sidebar-item active" data-socio-nav="inicio">
+            <span class="sidebar-icon">🏠</span> Inicio
+          </div>
+          <div class="sidebar-item" data-socio-nav="cuotas">
+            <span class="sidebar-icon">💳</span> Mis cuotas
+          </div>
+          <div class="sidebar-item" data-socio-nav="carnet">
+            <span class="sidebar-icon">🪪</span> Carnet digital
+          </div>
+          <div class="sidebar-item" data-socio-nav="horarios">
+            <span class="sidebar-icon">📅</span> Horarios
+          </div>
+          <div class="sidebar-item" data-socio-nav="asistencia">
+            <span class="sidebar-icon">✅</span> Asistencia
+          </div>
+          <div class="sidebar-item" data-socio-nav="pagar">
+            <span class="sidebar-icon">💰</span> Cómo pagar
+          </div>
+        </nav>
+        <div class="sidebar-footer">
+          <button class="btn btn-outline btn-full btn-sm" id="socio-logout-desk">Cerrar sesión</button>
+        </div>
+      </aside>
+
+      <!-- Main area -->
+      <div class="main-content">
+
+        <!-- AppBar -->
+        <header class="appbar" id="socio-appbar">
+          <img src="" alt="Bristol" class="appbar-logo" id="appbar-logo" style="display:none">
+          <img src="./logo.png" alt="Bristol" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,.3)" onerror="this.outerHTML='<div style=&quot;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:20px&quot;>⚽</div>'">
+          <div class="appbar-title">
+            <h1 id="appbar-title">Bristol F.C.</h1>
+            <span id="appbar-subtitle">Panel de socio</span>
+          </div>
+          <div class="appbar-actions">
+            <button class="icon-btn" id="socio-logout-mobile" title="Cerrar sesión">🚪</button>
+          </div>
+        </header>
+
+        <!-- SOCIO PAGES -->
+        <!-- Home -->
+        <div id="sp-inicio" class="scroll-content anim-in" style="display:block"></div>
+        <!-- Cuotas -->
+        <div id="sp-cuotas" class="scroll-content anim-in" style="display:none"></div>
+        <!-- Carnet -->
+        <div id="sp-carnet" class="scroll-content anim-in" style="display:none"></div>
+        <!-- Horarios -->
+        <div id="sp-horarios" class="scroll-content anim-in" style="display:none"></div>
+        <!-- Asistencia -->
+        <div id="sp-asistencia" class="scroll-content anim-in" style="display:none"></div>
+        <!-- Pagar -->
+        <div id="sp-pagar" class="scroll-content anim-in" style="display:none"></div>
+
+      </div>
+    </div>
+
+    <!-- Bottom nav (mobile) -->
+    <nav class="bottom-nav" id="socio-bottom-nav">
+      <div class="nav-item active" data-socio-nav="inicio">
+        <span class="nav-icon">🏠</span><span>Inicio</span>
+      </div>
+      <div class="nav-item" data-socio-nav="cuotas">
+        <span class="nav-icon">💳</span><span>Cuotas</span>
+      </div>
+      <div class="nav-item" data-socio-nav="carnet">
+        <span class="nav-icon">🪪</span><span>Carnet</span>
+      </div>
+      <div class="nav-item" data-socio-nav="horarios">
+        <span class="nav-icon">📅</span><span>Horarios</span>
+      </div>
+      <div class="nav-item" data-socio-nav="asistencia">
+        <span class="nav-icon">✅</span><span>Asistencia</span>
+      </div>
+    </nav>
+  </div>
+
+  <!-- ══ ADMIN LAYOUT ══ -->
+  <div id="view-admin" class="view" style="display:none">
+    <div class="desktop-layout" style="flex:1">
+
+      <!-- Sidebar desktop admin -->
+      <aside class="sidebar" id="admin-sidebar">
+        <div class="sidebar-header">
+          <div class="sidebar-logo">🛠️</div>
+          <div>
+            <div class="sidebar-club" style="font-weight:800">Bristol F.C.</div>
+            <div class="text-xs text-muted">Administración</div>
+          </div>
+        </div>
+        <nav class="sidebar-nav">
+          <div class="sidebar-item active" data-admin-nav="dashboard">
+            <span class="sidebar-icon">📊</span> Dashboard
+          </div>
+          <div class="sidebar-item" data-admin-nav="pago">
+            <span class="sidebar-icon">💳</span> Registrar pago
+          </div>
+          <div class="sidebar-item" data-admin-nav="atrasos">
+            <span class="sidebar-icon">⚠️</span> Cuotas atrasadas
+          </div>
+          <div class="sidebar-item" data-admin-nav="asistencia">
+            <span class="sidebar-icon">✅</span> Registrar asistencia
+          </div>
+          <div class="sidebar-item" data-admin-nav="socios">
+            <span class="sidebar-icon">👥</span> Socios
+          </div>
+          <div class="sidebar-item" data-admin-nav="log">
+            <span class="sidebar-icon">📋</span> Log de pagos
+          </div>
+        </nav>
+        <div class="sidebar-footer">
+          <button class="btn btn-outline btn-full btn-sm" id="admin-logout-desk">Cerrar sesión</button>
+        </div>
+      </aside>
+
+      <div class="main-content">
+        <header class="appbar" style="background:var(--blue-900)">
+          <div style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:20px">🛠️</div>
+          <div class="appbar-title">
+            <h1>Administración</h1>
+            <span>Bristol F.C.</span>
+          </div>
+          <div class="appbar-actions">
+            <button class="icon-btn" id="admin-logout-mobile">🚪</button>
+          </div>
+        </header>
+
+        <div id="ap-dashboard" class="scroll-content anim-in" style="display:block"></div>
+        <div id="ap-pago"      class="scroll-content anim-in" style="display:none"></div>
+        <div id="ap-atrasos"   class="scroll-content anim-in" style="display:none"></div>
+        <div id="ap-asistencia" class="scroll-content anim-in" style="display:none"></div>
+        <div id="ap-socios"    class="scroll-content anim-in" style="display:none"></div>
+        <div id="ap-log"       class="scroll-content anim-in" style="display:none"></div>
+      </div>
+    </div>
+
+    <nav class="bottom-nav">
+      <div class="nav-item active" data-admin-nav="dashboard">
+        <span class="nav-icon">📊</span><span>Resumen</span>
+      </div>
+      <div class="nav-item" data-admin-nav="pago">
+        <span class="nav-icon">💳</span><span>Pago</span>
+      </div>
+      <div class="nav-item" data-admin-nav="atrasos">
+        <span class="nav-icon">⚠️</span><span>Atrasos</span>
+      </div>
+      <div class="nav-item" data-admin-nav="asistencia">
+        <span class="nav-icon">✅</span><span>Asistencia</span>
+      </div>
+      <div class="nav-item" data-admin-nav="socios">
+        <span class="nav-icon">👥</span><span>Socios</span>
+      </div>
+    </nav>
+  </div>
+
+</div><!-- /#app -->
+
+<script>
+/* ══════════════════════════════════════════════════
+   DATA — Base de datos local (localStorage)
+══════════════════════════════════════════════════ */
+const MESES = ['Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+const MES_ACTUAL_IDX = 7; // Nov = índice 7 (empezando en Marzo)
+const VALOR_CUOTA = 12000;
+
+const USERS = {
+  soc01: { pass:'1234', role:'socio', socioId:'S1' },
+  soc02: { pass:'1234', role:'socio', socioId:'S2' },
+  soc03: { pass:'1234', role:'socio', socioId:'S3' },
+  admin01: { pass:'admin123', role:'admin' }
+};
+
+const HORARIOS = {
+  Fútbol:    { dias:'Martes y Jueves', hora:'18:00 – 19:30', lugar:'Cancha principal', emoji:'⚽' },
+  Taekwondo: { dias:'Lunes y Miércoles', hora:'19:00 – 20:30', lugar:'Salón cubierto A', emoji:'🥋' },
+  Patín:     { dias:'Viernes', hora:'17:30 – 19:00', lugar:'Pista de patín', emoji:'⛸️' }
+};
+
+// Semilla de datos iniciales
+const INITIAL_SOCIOS = [
+  {
+    id:'S1', nombre:'Lucía González', actividad:'Fútbol',
+    usuario:'soc01', numSocio:'001',
+    pagos:{ 0:true,1:true,2:true,3:true,4:true,5:true,6:true,7:false },
+    asistencia:{ 0:[1,1,0,1,1,0,1,1,0,1,0,1], 1:[1,0,1,1,0,1,1,1,0,0,1,1], 2:[1,1,1,0,1,1,0,1,1,1,0,1], 3:[1,1,0,1,1,1,0,1,0,1,1,0], 4:[0,1,1,1,0,1,1,0,1,1,1,0], 5:[1,0,1,0,1,1,1,0,1,0,1,1], 6:[1,1,0,1,0,1,1,1,0,1,0,1], 7:[1,0,1,1,0,0] }
+  },
+  {
+    id:'S2', nombre:'Tomás Martínez', actividad:'Taekwondo',
+    usuario:'soc02', numSocio:'002',
+    pagos:{ 0:true,1:true,2:true,3:true,4:true,5:false,6:false,7:false },
+    asistencia:{ 0:[1,1,0,1,1,1], 1:[1,0,1,1,0,1,1,1,0,0], 2:[1,1,1,0,1,1,0,1,1,1], 3:[0,1,1,1,0,1,1,0,1,1], 4:[1,0,1,0,1,1,1,0,1,0], 5:[0,0,1,0,0,1,0,0,1,0], 6:[1,0,0,1,0,0,1,1,0,0], 7:[1,0,0,1,0,0] }
+  },
+  {
+    id:'S3', nombre:'Valentina Ruiz', actividad:'Patín',
+    usuario:'soc03', numSocio:'003',
+    pagos:{ 0:true,1:true,2:true,3:true,4:true,5:true,6:true,7:true },
+    asistencia:{ 0:[1,1,1,1,0], 1:[1,1,0,1,1,1], 2:[1,1,1,0,1,1], 3:[1,1,1,1,1,0], 4:[1,0,1,1,1,1], 5:[1,1,1,1,0,1], 6:[1,1,0,1,1,1], 7:[1,1,1,1,0] }
+  }
+];
+
+/* ── LocalStorage helpers ── */
+function lsGet(key, def) {
+  try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : def; }
+  catch { return def; }
+}
+function lsSet(key, val) {
+  try { localStorage.setItem(key, JSON.stringify(val)); } catch {}
+}
+
+function getSocios() {
+  let s = lsGet('bristol_socios', null);
+  if (!s) { s = INITIAL_SOCIOS; lsSet('bristol_socios', s); }
+  return s;
+}
+function saveSocios(s) { lsSet('bristol_socios', s); }
+function getPagosLog() { return lsGet('bristol_log', []); }
+function savePagosLog(l) { lsSet('bristol_log', l); }
+function getAsistLog() { return lsGet('bristol_asist', []); }
+function saveAsistLog(l) { lsSet('bristol_asist', l); }
+
+/* ══════════════════════════════════════════════════
+   STATE
+══════════════════════════════════════════════════ */
+let currentUser = null; // { username, role, socioId }
+let socioPage = 'inicio';
+let adminPage = 'dashboard';
+
+/* ══════════════════════════════════════════════════
+   UTILS
+══════════════════════════════════════════════════ */
+const $ = id => document.getElementById(id);
+const fmt = n => '$ ' + n.toLocaleString('es-AR');
+const deuda = s => Object.values(s.pagos).filter(v => !v).length;
+const avColors = ['av-blue','av-teal','av-purple','av-orange','av-pink'];
+function avColor(id) { return avColors[['S1','S2','S3','S4','S5'].indexOf(id) % avColors.length]; }
+function initials(name) { return name.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase(); }
+
+function showToast(msg, type='') {
+  const tc = $('toast-container');
+  const t = document.createElement('div');
+  t.className = 'toast' + (type ? ' toast-'+type : '');
+  t.textContent = msg;
+  tc.appendChild(t);
+  setTimeout(() => t.classList.add('show'), 20);
+  setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 350); }, 2800);
+}
+
+/* ══════════════════════════════════════════════════
+   LOGIN
+══════════════════════════════════════════════════ */
+function doLogin() {
+  const user = $('inp-user').value.trim().toLowerCase();
+  const pass = $('inp-pass').value;
+  const u = USERS[user];
+  if (!u || u.pass !== pass) { showToast('Usuario o contraseña incorrectos', 'error'); return; }
+  currentUser = { username: user, role: u.role, socioId: u.socioId || null };
+  lsSet('bristol_session', currentUser);
+  enterApp();
+}
+
+function logout() {
+  currentUser = null;
+  lsSet('bristol_session', null);
+  $('inp-pass').value = '';
+  showView('login');
+}
+
+$('btn-login').onclick = doLogin;
+$('inp-pass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+$('inp-user').addEventListener('keydown', e => { if (e.key === 'Enter') $('inp-pass').focus(); });
+
+// Restore session
+(function() {
+  const s = lsGet('bristol_session', null);
+  if (s && USERS[s.username]) { currentUser = s; enterApp(); }
+})();
+
+/* ══════════════════════════════════════════════════
+   VIEWS
+══════════════════════════════════════════════════ */
+function showView(name) {
+  ['login','socio','admin'].forEach(v => {
+    const el = $('view-'+v);
+    el.classList.remove('active');
+    el.style.display = 'none';
+  });
+  const target = $('view-'+name);
+  target.style.display = name === 'login' ? 'flex' : 'flex';
+  target.classList.add('active');
+}
+
+function enterApp() {
+  if (currentUser.role === 'admin') {
+    showView('admin');
+    renderAdminPage('dashboard');
+    bindAdminNav();
+    $('admin-logout-mobile').onclick = logout;
+    $('admin-logout-desk').onclick = logout;
+  } else {
+    const socios = getSocios();
+    const s = socios.find(x => x.id === currentUser.socioId);
+    // Update appbar
+    $('appbar-title').textContent = s ? s.nombre.split(' ')[0] : 'Socio';
+    $('appbar-subtitle').textContent = s ? s.actividad : '';
+    $('sidebar-user-name').textContent = s ? s.nombre : '';
+    showView('socio');
+    renderSocioPage('inicio');
+    bindSocioNav();
+    $('socio-logout-mobile').onclick = logout;
+    $('socio-logout-desk').onclick = logout;
+  }
+}
+
+/* ══════════════════════════════════════════════════
+   NAV BINDING
+══════════════════════════════════════════════════ */
+function bindSocioNav() {
+  document.querySelectorAll('[data-socio-nav]').forEach(el => {
+    el.onclick = () => {
+      const page = el.dataset.socioNav;
+      document.querySelectorAll('[data-socio-nav]').forEach(x => x.classList.remove('active'));
+      document.querySelectorAll('[data-socio-nav="'+page+'"]').forEach(x => x.classList.add('active'));
+      renderSocioPage(page);
+    };
+  });
+}
+
+function bindAdminNav() {
+  document.querySelectorAll('[data-admin-nav]').forEach(el => {
+    el.onclick = () => {
+      const page = el.dataset.adminNav;
+      document.querySelectorAll('[data-admin-nav]').forEach(x => x.classList.remove('active'));
+      document.querySelectorAll('[data-admin-nav="'+page+'"]').forEach(x => x.classList.add('active'));
+      renderAdminPage(page);
+    };
+  });
+}
+
+/* ══════════════════════════════════════════════════
+   SOCIO — PAGE ROUTER
+══════════════════════════════════════════════════ */
+function renderSocioPage(page) {
+  ['inicio','cuotas','carnet','horarios','asistencia','pagar'].forEach(p => {
+    $('sp-'+p).style.display = 'none';
+  });
+  const el = $('sp-'+page);
+  if (el) { el.style.display = 'block'; el.style.animation = 'none'; void el.offsetWidth; el.style.animation = ''; }
+
+  const socios = getSocios();
+  const s = socios.find(x => x.id === currentUser.socioId);
+  if (!s) return;
+
+  switch(page) {
+    case 'inicio':     renderSocioInicio(s); break;
+    case 'cuotas':     renderSocioCuotas(s); break;
+    case 'carnet':     renderSocioCarnet(s); break;
+    case 'horarios':   renderSocioHorarios(s); break;
+    case 'asistencia': renderSocioAsistencia(s); break;
+    case 'pagar':      renderSocioPagar(s); break;
+  }
+}
+
+/* ── Inicio ── */
+function renderSocioInicio(s) {
+  const el = $('sp-inicio');
+  const deu = deuda(s);
+  const pagosMes = Object.values(s.pagos).filter(Boolean).length;
+  const totalMeses = Object.keys(s.pagos).length;
+  const pct = Math.round(pagosMes / totalMeses * 100);
+
+  // Asistencia del mes actual
+  const asist = s.asistencia[MES_ACTUAL_IDX] || [];
+  const presentes = asist.filter(Boolean).length;
+
+  el.innerHTML = `
+    <div class="hero-card anim-in" style="margin-bottom:12px">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
+        <div class="avatar avatar-lg ${avColor(s.id)}">${initials(s.nombre)}</div>
+        <div>
+          <div style="font-size:20px;font-weight:800">${s.nombre}</div>
+          <div style="opacity:.8;font-size:14px">${s.actividad} · N.º ${s.numSocio}</div>
+        </div>
+      </div>
+      <div style="font-size:13px;opacity:.8;margin-bottom:6px">Cuotas pagas ${new Date().getFullYear()}</div>
+      <div class="progress-wrap"><div class="progress-bar" style="width:${pct}%"></div></div>
+      <div style="display:flex;justify-content:space-between;font-size:12px;opacity:.8;margin-top:6px">
+        <span>${pagosMes} de ${totalMeses} meses</span>
+        <span>${pct}%</span>
+      </div>
+    </div>
+
+    <div class="stat-grid anim-in-2">
+      <div class="stat-card">
+        <div class="stat-value ${deu ? 'text-red' : 'text-green'}">${deu ? fmt(deu * VALOR_CUOTA) : '✓ Al día'}</div>
+        <div class="stat-label">${deu ? deu + ' cuota' + (deu>1?'s':'') + ' pendiente' + (deu>1?'s':'') : 'Sin deuda'}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">${presentes}</div>
+        <div class="stat-label">Asistencias este mes</div>
+      </div>
+    </div>
+
+    <div class="card anim-in-3">
+      <div class="section-header">
+        <div class="section-title">Accesos rápidos</div>
+      </div>
+      <div class="quick-grid">
+        <div class="quick-btn" data-socio-nav="cuotas"><div class="qb-icon">💳</div>Mis cuotas</div>
+        <div class="quick-btn" data-socio-nav="carnet"><div class="qb-icon">🪪</div>Carnet digital</div>
+        <div class="quick-btn" data-socio-nav="asistencia"><div class="qb-icon">✅</div>Asistencia</div>
+        <div class="quick-btn qb-primary" data-socio-nav="pagar"><div class="qb-icon">💰</div>Cómo pagar</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📢 Novedades del club</div>
+      <div class="list-row">
+        <div class="row-left">
+          <div class="row-title">Torneo de verano 2026</div>
+          <div class="row-sub">Inscripción abierta hasta el 30/11</div>
+        </div>
+        <span class="badge badge-blue">Nuevo</span>
+      </div>
+      <div class="list-row">
+        <div class="row-left">
+          <div class="row-title">Feria de ropa deportiva</div>
+          <div class="row-sub">Sábado 22/11, 10:00–14:00 en el club</div>
+        </div>
+        <span class="badge badge-gray">Info</span>
+      </div>
+    </div>
+
+    <div style="text-align:center;padding:12px 0">
+      <a href="https://wa.me/" style="color:var(--primary);font-size:14px;font-weight:600">📱 Contactar al club por WhatsApp</a>
+    </div>
+  `;
+
+  // Re-bind quick nav buttons
+  el.querySelectorAll('[data-socio-nav]').forEach(btn => {
+    btn.onclick = () => {
+      const page = btn.dataset.socioNav;
+      document.querySelectorAll('[data-socio-nav]').forEach(x => x.classList.remove('active'));
+      document.querySelectorAll('[data-socio-nav="'+page+'"]').forEach(x => x.classList.add('active'));
+      renderSocioPage(page);
+    };
+  });
+}
+
+/* ── Cuotas ── */
+function renderSocioCuotas(s) {
+  const el = $('sp-cuotas');
+  const deu = deuda(s);
+  el.innerHTML = `
+    <div class="card" style="background:linear-gradient(135deg,${deu?'#c0392b':'#17a85a'},${deu?'#e74c3c':'#1abc9c'});color:#fff;border:none">
+      <div style="font-size:13px;opacity:.85">Estado de cuenta · ${s.nombre}</div>
+      <div style="font-size:28px;font-weight:800;margin:6px 0">${deu ? fmt(deu * VALOR_CUOTA) : '✓ Al día'}</div>
+      <div style="font-size:13px;opacity:.85">${deu ? deu + ' cuota(s) pendiente(s) · Vence el 10 de cada mes' : 'Próximo vencimiento: 10/12/2025'}</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Detalle de cuotas 2025</div>
+      ${MESES.slice(0, MES_ACTUAL_IDX + 1).map((m, i) => `
+        <div class="list-row">
+          <div class="row-left">
+            <div class="row-title">${m} 2025</div>
+            <div class="row-sub">${s.pagos[i] ? 'Pagada' : 'Vence: 10/' + (i+3) + '/2025'}</div>
+          </div>
+          <span class="badge ${s.pagos[i] ? 'badge-green' : 'badge-red'}">${s.pagos[i] ? '✓ Pagada' : fmt(VALOR_CUOTA)}</span>
+        </div>
+      `).join('')}
+    </div>
+    <p class="text-sm text-muted" style="text-align:center;padding:8px 0">Valor de cuota: ${fmt(VALOR_CUOTA)} · Actividad: ${s.actividad}</p>
+  `;
+}
+
+/* ── Carnet ── */
+function renderSocioCarnet(s) {
+  const el = $('sp-carnet');
+  const pagosMes = MESES.slice(0, MES_ACTUAL_IDX + 1).map((m,i) => ({m, paid: s.pagos[i]}));
+
+  el.innerHTML = `
+    <div class="carnet">
+      <div class="carnet-club">Bristol F.C. · Carnet Digital</div>
+      <div class="carnet-name">${s.nombre}</div>
+      <div class="carnet-info">${s.actividad} · Socio N.º ${s.numSocio} · Año 2025</div>
+      <div class="carnet-divider"></div>
+      <div style="font-size:11px;opacity:.8;margin-bottom:8px">Meses al día</div>
+      <div class="carnet-months">
+        ${pagosMes.map(({m,paid}) => `<div class="carnet-month ${paid?'paid':'pending'}">${m}</div>`).join('')}
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="text-align:center">Código QR del carnet</div>
+      <div class="qr-wrap">
+        <div id="qr-container"></div>
+        <div>
+          <div class="text-sm fw-bold">${s.nombre}</div>
+          <div class="text-xs text-muted">${s.actividad}</div>
+          <div class="text-xs text-muted">N.º ${s.numSocio}</div>
+          <div class="mt-8">
+            <span class="badge ${deuda(s)?'badge-red':'badge-green'}">${deuda(s)?'Con deuda':'Al día'}</span>
+          </div>
+        </div>
+      </div>
+      <p class="text-xs text-muted" style="text-align:center;margin-top:12px">Mostrá este carnet en la entrada del club. Reemplaza al carnet de papel.</p>
+    </div>
+  `;
+
+  // Generate QR
+  try {
+    new QRCode($('qr-container'), {
+      text: `BRISTOL FC | ${s.nombre} | ${s.actividad} | N.${s.numSocio} | ${deuda(s)?'DEUDA':'AL DIA'}`,
+      width: 140, height: 140,
+      colorDark: '#0d1b4b', colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.H
+    });
+  } catch(e) {
+    $('qr-container').innerHTML = '<div style="text-align:center;padding:20px;font-size:12px;color:var(--text-muted)">QR no disponible sin conexión</div>';
+  }
+}
+
+/* ── Horarios ── */
+function renderSocioHorarios(s) {
+  const el = $('sp-horarios');
+  el.innerHTML = `
+    <div class="card">
+      <div class="card-title">📅 Horarios de actividades</div>
+      ${Object.entries(HORARIOS).map(([act,h]) => `
+        <div class="list-row" style="${act===s.actividad?'background:var(--primary-light);margin:0 -16px;padding:12px 16px;border-radius:var(--radius-sm)':''}">
+          <div class="row-left">
+            <div class="row-title">${h.emoji} ${act} ${act===s.actividad?'<span class="badge badge-blue" style="font-size:10px">Tu actividad</span>':''}</div>
+            <div class="row-sub">${h.dias}</div>
+            <div class="row-sub">🕐 ${h.hora}</div>
+            <div class="row-sub">📍 ${h.lugar}</div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+    <div class="card">
+      <div class="card-title">📍 Ubicación del club</div>
+      <div class="list-row">
+        <div class="row-left">
+          <div class="row-title">Club Bristol F.C.</div>
+          <div class="row-sub">Buenos Aires, Argentina</div>
+        </div>
+        <a href="https://maps.google.com" target="_blank" class="badge badge-blue">Ver mapa</a>
+      </div>
+      <div class="list-row">
+        <div class="row-left">
+          <div class="row-title">Horario de secretaría</div>
+          <div class="row-sub">Lunes a Viernes, 16:00 – 20:00</div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+/* ── Asistencia ── */
+function renderSocioAsistencia(s) {
+  const el = $('sp-asistencia');
+  const totalAsist = Object.values(s.asistencia).reduce((acc, arr) => acc + arr.filter(Boolean).length, 0);
+  const totalClases = Object.values(s.asistencia).reduce((acc, arr) => acc + arr.length, 0);
+  const pct = totalClases ? Math.round(totalAsist / totalClases * 100) : 0;
+
+  el.innerHTML = `
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-value text-green">${pct}%</div>
+        <div class="stat-label">Asistencia general</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">${totalAsist}</div>
+        <div class="stat-label">Clases asistidas</div>
+      </div>
+    </div>
+
+    ${MESES.slice(0, MES_ACTUAL_IDX + 1).map((mes, i) => {
+      const arr = s.asistencia[i] || [];
+      const pres = arr.filter(Boolean).length;
+      return `
+        <div class="card">
+          <div class="section-header">
+            <div class="section-title">${mes} 2025</div>
+            <span class="badge ${pres/arr.length >= .75 ? 'badge-green' : pres/arr.length >= .5 ? 'badge-amber' : 'badge-red'}">${pres}/${arr.length} clases</span>
+          </div>
+          <div class="attend-grid">
+            ${arr.map(v => `<div class="attend-day ${v ? 'attend-present' : 'attend-absent'}">${v ? '✓' : '✗'}</div>`).join('')}
+          </div>
+        </div>
+      `;
+    }).join('')}
+  `;
+}
+
+/* ── Pagar ── */
+function renderSocioPagar(s) {
+  const el = $('sp-pagar');
+  el.innerHTML = `
+    <div class="hero-card" style="margin-bottom:12px">
+      <div style="font-size:22px;font-weight:800">💳 Medios de pago</div>
+      <div style="opacity:.8;margin-top:6px;font-size:14px">El club acepta los siguientes medios</div>
+    </div>
+
+    <div class="card">
+      <div class="list-row">
+        <div class="row-left">
+          <div class="row-title">🟡 Mercado Pago</div>
+          <div class="row-sub">Alias: bristol.fc.pagos</div>
+          <div class="row-sub">(Alias a definir por el club)</div>
+        </div>
+        <span class="badge badge-amber">Recomendado</span>
+      </div>
+      <div class="list-row">
+        <div class="row-left">
+          <div class="row-title">🏦 Transferencia bancaria</div>
+          <div class="row-sub">CBU/Alias: a definir por el club</div>
+        </div>
+      </div>
+      <div class="list-row">
+        <div class="row-left">
+          <div class="row-title">💵 Efectivo en el club</div>
+          <div class="row-sub">Lunes a Viernes, 16:00–20:00 en secretaría</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">⚠️ ¿Tenés una cuota pendiente?</div>
+      ${deuda(s) > 0
+        ? `<p class="text-sm" style="margin-bottom:12px">Tenés <strong>${deuda(s)} cuota(s) pendiente(s)</strong> por un total de <strong>${fmt(deuda(s) * VALOR_CUOTA)}</strong>. Una vez que abones, avisale al encargado del club para registrar el pago.</p>`
+        : `<p class="text-sm text-green">✓ Estás al día con todas tus cuotas.</p>`}
+      <div style="text-align:center;margin-top:12px">
+        <a href="https://wa.me/" target="_blank" class="btn btn-primary">
+          📱 Avisar al club por WhatsApp
+        </a>
+      </div>
+    </div>
+
+    <p class="text-xs text-muted" style="text-align:center;padding:8px 0">Este prototipo no procesa pagos en línea. Sirve para demostrar cómo el socio puede consultar su estado y saber cómo pagar.</p>
+  `;
+}
+
+/* ══════════════════════════════════════════════════
+   ADMIN — PAGE ROUTER
+══════════════════════════════════════════════════ */
+function renderAdminPage(page) {
+  ['dashboard','pago','atrasos','asistencia','socios','log'].forEach(p => {
+    $('ap-'+p).style.display = 'none';
+  });
+  const el = $('ap-'+page);
+  if (el) { el.style.display = 'block'; el.style.animation='none'; void el.offsetWidth; el.style.animation=''; }
+
+  switch(page) {
+    case 'dashboard':  renderAdminDashboard(); break;
+    case 'pago':       renderAdminPago(); break;
+    case 'atrasos':    renderAdminAtrasos(); break;
+    case 'asistencia': renderAdminAsistencia(); break;
+    case 'socios':     renderAdminSocios(); break;
+    case 'log':        renderAdminLog(); break;
+  }
+}
+
+/* ── Dashboard ── */
+function renderAdminDashboard() {
+  const socios = getSocios();
+  const totalSocios = socios.length;
+  const totalDeudas = socios.reduce((a,s) => a+deuda(s), 0);
+  const pagosMes = socios.reduce((a,s) => a + (s.pagos[MES_ACTUAL_IDX]?1:0), 0);
+  const log = getPagosLog();
+
+  const el = $('ap-dashboard');
+  el.innerHTML = `
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-value">${totalSocios}</div>
+        <div class="stat-label">Socios activos</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value text-green">${pagosMes}</div>
+        <div class="stat-label">Pagaron este mes</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value text-red">${totalDeudas}</div>
+        <div class="stat-label">Cuotas pendientes</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">${log.length}</div>
+        <div class="stat-label">Pagos registrados</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">👥 Estado por socio</div>
+      ${socios.map(s => {
+        const d = deuda(s);
+        const asistMes = (s.asistencia[MES_ACTUAL_IDX]||[]);
+        const pres = asistMes.filter(Boolean).length;
+        return `
+          <div class="list-row">
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="avatar avatar-sm ${avColor(s.id)}">${initials(s.nombre)}</div>
+              <div class="row-left">
+                <div class="row-title">${s.nombre}</div>
+                <div class="row-sub">${s.actividad} · ${pres} asistencias este mes</div>
+              </div>
+            </div>
+            <span class="badge ${d?'badge-red':'badge-green'}">${d?d+' deuda':'Al día'}</span>
+          </div>
+        `;
+      }).join('')}
+    </div>
+
+    <div class="card">
+      <div class="card-title">📊 Recaudación estimada</div>
+      <div class="list-row">
+        <div class="row-left"><div class="row-title">Cobrado este mes</div></div>
+        <strong class="text-green">${fmt(pagosMes * VALOR_CUOTA)}</strong>
+      </div>
+      <div class="list-row">
+        <div class="row-left"><div class="row-title">Pendiente de cobro</div></div>
+        <strong class="text-red">${fmt(totalDeudas * VALOR_CUOTA)}</strong>
+      </div>
+      <div class="list-row" style="border-bottom:0">
+        <div class="row-left"><div class="row-title">Total esperado</div></div>
+        <strong>${fmt(totalSocios * VALOR_CUOTA)}</strong>
+      </div>
+    </div>
+  `;
+}
+
+/* ── Registrar pago ── */
+function renderAdminPago() {
+  const socios = getSocios();
+  const el = $('ap-pago');
+  el.innerHTML = `
+    <div class="card">
+      <div class="card-title">💳 Registrar un pago</div>
+      <div class="form-group">
+        <label class="form-label">Socio</label>
+        <select class="form-input" id="a-socio">
+          ${socios.map(s => `<option value="${s.id}">${s.nombre} · ${s.actividad}</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Mes</label>
+        <select class="form-input" id="a-mes">
+          ${MESES.slice(0, MES_ACTUAL_IDX+1).map((m,i) => `<option value="${i}">${m} 2025</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Medio de pago</label>
+        <select class="form-input" id="a-medio">
+          <option>Efectivo</option>
+          <option>Transferencia</option>
+          <option>Mercado Pago</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Monto (opcional)</label>
+        <input class="form-input" id="a-monto" type="number" placeholder="${VALOR_CUOTA}" value="${VALOR_CUOTA}">
+      </div>
+      <button class="btn btn-primary btn-full" id="btn-pago">✓ Registrar pago</button>
+    </div>
+    <div id="pago-estado-wrap"></div>
+  `;
+
+  $('btn-pago').onclick = () => {
+    const socios2 = getSocios();
+    const id = $('a-socio').value;
+    const mes = +$('a-mes').value;
+    const medio = $('a-medio').value;
+    const monto = +$('a-monto').value || VALOR_CUOTA;
+    const s = socios2.find(x => x.id === id);
+    if (!s) return;
+    if (s.pagos[mes]) { showToast('Esa cuota ya está pagada', 'error'); return; }
+    s.pagos[mes] = true;
+    saveSocios(socios2);
+    const log = getPagosLog();
+    const now = new Date();
+    log.push({
+      socio: s.nombre, actividad: s.actividad, mes: MESES[mes],
+      medio, monto, fecha: now.toLocaleString('es-AR'),
+      id: id
+    });
+    savePagosLog(log);
+    showToast('✓ Pago registrado correctamente', 'success');
+    // Show confirmation
+    $('pago-estado-wrap').innerHTML = `
+      <div class="card" style="border-color:var(--green)">
+        <div class="text-green fw-bold" style="margin-bottom:4px">✓ Pago registrado</div>
+        <div class="text-sm">${s.nombre} · ${MESES[mes]} 2025</div>
+        <div class="text-sm text-muted">${medio} · ${fmt(monto)}</div>
+        <div class="text-xs text-muted mt-8">${now.toLocaleString('es-AR')}</div>
+      </div>
+    `;
+  };
+}
+
+/* ── Cuotas atrasadas ── */
+function renderAdminAtrasos() {
+  const socios = getSocios();
+  const atr = socios.filter(s => deuda(s) > 0);
+  const el = $('ap-atrasos');
+  el.innerHTML = `
+    <div class="card">
+      <div class="card-title">⚠️ Cuotas atrasadas</div>
+      ${atr.length === 0
+        ? '<div class="empty-state"><div class="es-icon">🎉</div><h3>Sin atrasos</h3><p>Todos los socios están al día</p></div>'
+        : atr.map(s => `
+          <div class="list-row">
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="avatar avatar-sm ${avColor(s.id)}">${initials(s.nombre)}</div>
+              <div class="row-left">
+                <div class="row-title">${s.nombre}</div>
+                <div class="row-sub">${s.actividad}</div>
+                <div class="row-sub">
+                  ${MESES.slice(0, MES_ACTUAL_IDX+1).filter((_,i)=>!s.pagos[i]).map(m=>`<span class="badge badge-red" style="margin-right:4px">${m}</span>`).join('')}
+                </div>
+              </div>
+            </div>
+            <div class="text-sm text-red fw-bold">${fmt(deuda(s)*VALOR_CUOTA)}</div>
+          </div>
+        `).join('')
+      }
+    </div>
+    <div class="card">
+      <div style="text-align:center">
+        <div class="text-xl fw-800 text-red">${fmt(atr.reduce((a,s)=>a+deuda(s),0)*VALOR_CUOTA)}</div>
+        <div class="text-sm text-muted mt-4">Total adeudado</div>
+      </div>
+    </div>
+  `;
+}
+
+/* ── Registrar asistencia ── */
+function renderAdminAsistencia() {
+  const socios = getSocios();
+  const today = new Date();
+  const el = $('ap-asistencia');
+  const mesOpts = MESES.slice(0, MES_ACTUAL_IDX+1).map((m,i)=>`<option value="${i}"${i===MES_ACTUAL_IDX?' selected':''}>${m} 2025</option>`).join('');
+
+  el.innerHTML = `
+    <div class="card">
+      <div class="card-title">✅ Registrar asistencia</div>
+      <div class="form-group">
+        <label class="form-label">Fecha</label>
+        <input class="form-input" id="a-fecha" type="date" value="${today.toISOString().slice(0,10)}">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Actividad</label>
+        <select class="form-input" id="a-activ">
+          <option>Fútbol</option><option>Taekwondo</option><option>Patín</option>
+        </select>
+      </div>
+      <div id="asist-lista"></div>
+      <button class="btn btn-primary btn-full mt-12" id="btn-asist">Guardar asistencia</button>
+    </div>
+  `;
+
+  function updateLista() {
+    const activ = $('a-activ').value;
+    const filtrados = socios.filter(s => s.actividad === activ);
+    $('asist-lista').innerHTML = `
+      <div class="form-label" style="margin-top:8px">Marcar presentes</div>
+      ${filtrados.map(s => `
+        <div class="list-row">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div class="avatar avatar-sm ${avColor(s.id)}">${initials(s.nombre)}</div>
+            <div class="row-title">${s.nombre}</div>
+          </div>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+            <input type="checkbox" id="asist-${s.id}" style="width:20px;height:20px;cursor:pointer" ${s.pagos[MES_ACTUAL_IDX]?'':''}>
+            <span class="text-sm">Presente</span>
+          </label>
+        </div>
+      `).join('')}
+    `;
+  }
+  updateLista();
+  $('a-activ').onchange = updateLista;
+
+  $('btn-asist').onclick = () => {
+    const socios2 = getSocios();
+    const activ = $('a-activ').value;
+    const fecha = $('a-fecha').value;
+    const filtrados = socios2.filter(s => s.actividad === activ);
+    const log = getAsistLog();
+    filtrados.forEach(s => {
+      const presente = document.getElementById('asist-'+s.id)?.checked || false;
+      const mesArr = s.asistencia[MES_ACTUAL_IDX] || [];
+      mesArr.push(presente ? 1 : 0);
+      s.asistencia[MES_ACTUAL_IDX] = mesArr;
+      log.push({ socio: s.nombre, actividad: activ, fecha, presente });
+    });
+    saveSocios(socios2);
+    saveAsistLog(log);
+    showToast('✓ Asistencia registrada', 'success');
+  };
+}
+
+/* ── Socios ── */
+function renderAdminSocios() {
+  const socios = getSocios();
+  const el = $('ap-socios');
+  el.innerHTML = `
+    <div class="card">
+      <div class="card-title">👥 Listado de socios</div>
+      ${socios.map(s => {
+        const d = deuda(s);
+        const asistT = Object.values(s.asistencia).reduce((a,arr)=>a+arr.filter(Boolean).length,0);
+        const clasesT = Object.values(s.asistencia).reduce((a,arr)=>a+arr.length,0);
+        return `
+          <div class="list-row">
+            <div style="display:flex;align-items:center;gap:12px">
+              <div class="avatar ${avColor(s.id)}">${initials(s.nombre)}</div>
+              <div class="row-left">
+                <div class="row-title">${s.nombre}</div>
+                <div class="row-sub">${s.actividad} · N.º ${s.numSocio}</div>
+                <div class="row-sub">Usuario: ${s.usuario} · Asistencia: ${clasesT?Math.round(asistT/clasesT*100):0}%</div>
+                <div style="margin-top:4px">
+                  <span class="badge ${d?'badge-red':'badge-green'}">${d?d+' cuota(s) pendiente(s)':'Al día'}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
+}
+
+/* ── Log de pagos ── */
+function renderAdminLog() {
+  const log = getPagosLog();
+  const el = $('ap-log');
+  const csv = log.length
+    ? 'Socio;Actividad;Mes;Medio;Monto;Fecha\n' + log.map(l=>`${l.socio};${l.actividad};${l.mes};${l.medio};${l.monto};${l.fecha}`).join('\n')
+    : '';
+
+  el.innerHTML = `
+    <div class="card">
+      <div class="card-title">📋 Log de pagos registrados</div>
+      ${log.length === 0
+        ? '<div class="empty-state"><div class="es-icon">📋</div><h3>Sin pagos registrados</h3><p>Los pagos que registres en esta sesión aparecerán aquí</p></div>'
+        : log.slice().reverse().map(l => `
+          <div class="list-row">
+            <div class="row-left">
+              <div class="row-title">${l.socio}</div>
+              <div class="row-sub">${l.actividad} · ${l.mes} · ${l.medio}</div>
+              <div class="row-sub">${l.fecha}</div>
+            </div>
+            <strong class="text-green">${fmt(l.monto)}</strong>
+          </div>
+        `).join('')
+      }
+    </div>
+    ${log.length > 0 ? `
+      <div class="card">
+        <div class="card-title">Exportar CSV</div>
+        <textarea style="width:100%;height:120px;font-size:11px;font-family:monospace;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px;color:var(--text);resize:vertical" readonly>${csv}</textarea>
+        <button class="btn btn-outline btn-full mt-8" onclick="
+          const a=document.createElement('a');
+          a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(this.previousElementSibling.value);
+          a.download='bristol-pagos.csv';a.click()
+        ">⬇️ Descargar CSV</button>
+      </div>
+    ` : ''}
+  `;
+}
+
+/* ══════════════════════════════════════════════════
+   PWA — Service Worker & Install Prompt
+══════════════════════════════════════════════════ */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  });
+}
+
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  $('install-banner').classList.add('show');
+});
+
+$('install-btn').onclick = async () => {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  const {outcome} = await deferredPrompt.userChoice;
+  if (outcome === 'accepted') showToast('✓ App instalada correctamente', 'success');
+  deferredPrompt = null;
+  $('install-banner').classList.remove('show');
+};
+
+$('dismiss-banner').onclick = () => $('install-banner').classList.remove('show');
+
+window.addEventListener('appinstalled', () => {
+  showToast('✓ App instalada en tu dispositivo', 'success');
+  $('install-banner').classList.remove('show');
+});
+</script>
+</body>
+</html>
